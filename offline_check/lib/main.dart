@@ -3,8 +3,9 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:offline_check/logger/telemetry.dart';
 import 'keyboard/custom_keyboard.dart';
 import 'keyboard/custom_overlay.dart';
+import 'logger/logger.dart';
 
-void main() async {
+void main() {
   runApp(const MyApp());
 }
 
@@ -64,7 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   autofocus: true,
                   controller: textController,
                   onTap: () {
-                    Telemetry.startSpan('');
+                    Telemetry.startSpan('ontap');
+                    Logger.info('ontap');
                     showSizeKeyboard(context, textController, () {});
                   },
                   onChanged: (value) {
