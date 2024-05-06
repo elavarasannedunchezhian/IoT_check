@@ -30,12 +30,12 @@ class MetricApiAppender {
 
   Dio get _client => _clientInstance ??= Dio();
 
-  Future<void> sendLogEventsWithDio(List<MetricEntry> entries, CancelToken cancelToken) {
+  Future<void> sendMetricEventsWithDio(List<MetricEntry> entries, CancelToken cancelToken) {
     final jsonObject = LokiPushBody([LokiStream(labelsString, entries)]).toJson();
     final jsonBody = json.encode(jsonObject, toEncodable: (dynamic obj) {
       if (obj is MetricEntry) {
         return {
-          'ts': _dateFormat.format(DateTime.timestamp()),
+          'ts': _dateFormat.format(DateTime.now().toUtc()),
           'line': '{${obj.event.entries.map((entry) => '"${entry.key}": "${entry.value}"').join(',')}}',
         };
       }

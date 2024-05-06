@@ -6,7 +6,6 @@ import 'keyboard/custom_overlay.dart';
 
 void main() async {
   runApp(const MyApp());
-  Telemetry.startSpan('Main');
 }
 
 class MyApp extends StatelessWidget {
@@ -65,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   autofocus: true,
                   controller: textController,
                   onTap: () {
-                    Telemetry.stopSpan('Main');
+                    Telemetry.startSpan('');
                     showSizeKeyboard(context, textController, () {});
                   },
                   onChanged: (value) {
