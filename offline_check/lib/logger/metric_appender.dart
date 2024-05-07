@@ -36,7 +36,11 @@ class MetricApiAppender {
       if (obj is MetricEntry) {
         return {
           'ts': _dateFormat.format(DateTime.now().toUtc()),
-          'line': '{${obj.event.entries.map((entry) => '"${entry.key}": "${entry.value}"').join(',')}}',
+          'line': '{${obj.event.entries.map((entry) { 
+            final value = entry.value;
+            final stringValue = value is String ? '"$value"' : value.toString();
+            return '"${entry.key}": $stringValue';
+            }).join(',')}}',
         };
       }
       return obj.toJson();
@@ -100,5 +104,5 @@ class MetricEntry {
   });
 
   final String type;
-  final Map<String, String> event; 
+  final Map<String, dynamic> event; 
 }

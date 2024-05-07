@@ -7,7 +7,7 @@ import 'level.dart';
 import 'loki_appender.dart';
 
 class Logger {
-  static Future<void> _sendLogEvent(String name, Level level) async {
+  static Future<void> _sendLogEvent(String name, Level level,{StackTrace? stackTrace, bool isError = false}) async {
     try {
       final lokiAppender = LokiApiAppender(
         server: '172.208.58.149:3100',
@@ -23,7 +23,11 @@ class Logger {
       final logEntry = LogEntry(
         ts: DateTime.now(),
         line: name,
-        lineLabels: {},
+        lineLabels: {
+          if(isError)...{
+            ' - stackTrace': stackTrace.toString(),
+          }
+        },
       );
 
       await lokiAppender.sendLogEventsWithDio([logEntry], CancelToken());
@@ -35,7 +39,7 @@ class Logger {
   }
 
   static Future<void> info(String name) async => _sendLogEvent(name, Level.INFO);
-  static Future<void> error(String name) async => _sendLogEvent(name, Level.ERROR);
+  static Future<void> error(String name, StackTrace stackTrace) async => _sendLogEvent('Error occurred: $name', Level.ERROR, stackTrace: stackTrace, isError: true);
   static Future<void> debug(String name) async => _sendLogEvent(name, Level.DEBUG);
   static Future<void> warning(String name) async => _sendLogEvent(name, Level.WARNING);
 }

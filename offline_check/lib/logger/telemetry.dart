@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:offline_check/logger/level.dart';
+import 'package:offline_check/logger/logger.dart';
 import 'package:offline_check/logger/metric_appender.dart';
 
 class Telemetry {
@@ -28,11 +29,10 @@ class Telemetry {
         event: {
           'type': 'event',
           'event': name,
-          'screen': 'screenchange',
           'startTime': spanInfo.startTime,
           if (isStop)...{
             'stopTime': spanInfo.stopTime!,
-            'duration': '${DateTime.parse(spanInfo.stopTime!).difference(DateTime.parse(spanInfo.startTime)).inSeconds} s',
+            'duration': DateTime.parse(spanInfo.stopTime!).difference(DateTime.parse(spanInfo.startTime)).inMilliseconds,
             'status': 'success'
           }
         },
@@ -43,6 +43,7 @@ class Telemetry {
     } catch (error, stackTrace) {
       log('Error sending logs to Loki: $error');
       log('StackTrace: $stackTrace');
+      Logger.error('$error',stackTrace);
     }
   }
 

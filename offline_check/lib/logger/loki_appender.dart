@@ -118,7 +118,7 @@ class LogEntry {
       DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
   final DateTime ts;
   final String line;
-  final Map<String, String> lineLabels;
+  final Map<String, dynamic> lineLabels;
 
   String get tsFormatted => _dateFormat.format(ts.toUtc());
 }
