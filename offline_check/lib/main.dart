@@ -4,14 +4,11 @@ import 'dart:developer';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:offline_check/logger/logger.dart';
-import 'package:offline_check/logger/telemetry.dart';
 import 'keyboard/custom_keyboard.dart';
 import 'keyboard/custom_overlay.dart';
 
 void main() {
   runApp(const MyApp());
-  Telemetry.startSpan('started');
 }
 
 class MyApp extends StatelessWidget {
@@ -85,7 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   controller: textController,
                   onTap: () {
                     showSizeKeyboard(context, textController, () {});
-                    Telemetry.stopSpan('started');
                   },
                   onChanged: (value) {
                     setState(() {

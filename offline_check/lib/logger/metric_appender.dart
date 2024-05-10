@@ -35,20 +35,13 @@ class MetricApiAppender {
 
   Dio get _client => _clientInstance ??= Dio();
 
-  static String _encodeLineLabelValue(String value) {
-    if (value.contains(' ')) {
-      return json.encode(value);
-    }
-    return value;
-  }
-
   dynamic _metricEntryToJson(dynamic obj) {
     if (obj is MetricEntry) {
         return {
           'ts': _dateFormat.format(DateTime.now().toUtc()),
           'line': '{${obj.event.entries.map((entry) { 
             final value = entry.value;
-            final stringValue = value is String ? '"${_encodeLineLabelValue(value)}"' : _encodeLineLabelValue(value.toString());
+            final stringValue = value is String ? '"$value"' : value.toString();
             return '"${entry.key}": $stringValue';
             }).join(',')}}',
         };

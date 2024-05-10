@@ -43,7 +43,7 @@ class LokiApiAppender {
   }
   
   static List<dynamic> batch = []; 
-  static int batchSize = 3;
+  static int batchSize = 1;
   Future<void> sendLogEvents(List<LogEntry> entries, CancelToken cancelToken) async {
     final jsonObject = LokiPushBody([LokiStream(labelsString, entries)]).toJson();
     final jsonBody = json.encode(jsonObject, toEncodable: _logEntryToJson);
