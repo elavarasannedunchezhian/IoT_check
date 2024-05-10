@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -10,12 +11,8 @@ class MetricApiAppender {
     required this.username,
     required this.password,
     required this.labels,
-  })  : labelsString =
-            '{${labels.entries.map((entry) => '${entry.key}="${entry.value}"').join(',')}}',
-        authHeader = 'Basic ${base64.encode(utf8.encode([
-          username,
-          password
-        ].join(':')))}';
+  })  : labelsString = _createLabelsString(labels),
+        authHeader = _createAuthHeader(username, password);
 
   final String server;
   final String username;
@@ -24,56 +21,63 @@ class MetricApiAppender {
   final Map<String, String> labels;
   final String labelsString;
 
+  static String _createLabelsString(Map<String, String> labels) {
+    return '{${labels.entries.map((entry) => '${entry.key}="${entry.value}"').join(',')}}';
+  }
+
+  static _createAuthHeader(String username, String password) {
+    return 'Basic ${base64.encode(utf8.encode('$username:$password'))}';
+  }
+
   static final DateFormat _dateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
   Dio? _clientInstance;
 
   Dio get _client => _clientInstance ??= Dio();
 
-  Future<void> sendMetricEventsWithDio(List<MetricEntry> entries, CancelToken cancelToken) {
-    final jsonObject = LokiPushBody([LokiStream(labelsString, entries)]).toJson();
-    final jsonBody = json.encode(jsonObject, toEncodable: (dynamic obj) {
-      if (obj is MetricEntry) {
+  static String _encodeLineLabelValue(String value) {
+    if (value.contains(' ')) {
+      return json.encode(value);
+    }
+    return value;
+  }
+
+  dynamic _metricEntryToJson(dynamic obj) {
+    if (obj is MetricEntry) {
         return {
           'ts': _dateFormat.format(DateTime.now().toUtc()),
           'line': '{${obj.event.entries.map((entry) { 
             final value = entry.value;
-            final stringValue = value is String ? '"$value"' : value.toString();
+            final stringValue = value is String ? '"${_encodeLineLabelValue(value)}"' : _encodeLineLabelValue(value.toString());
             return '"${entry.key}": $stringValue';
             }).join(',')}}',
         };
       }
-      return obj.toJson();
-    });
-    return _client
-        .post<dynamic>(
-          'http://$server/api/prom/push',
-          cancelToken: cancelToken,
-          data: jsonBody,
-          options: Options(
-            headers: <String, String>{
-              HttpHeaders.authorizationHeader: authHeader,
-            },
-            contentType: ContentType(
-                    ContentType.json.primaryType, ContentType.json.subType)
-                .value,
-          ),
-        )
-        .then(
-          (response) => Future<void>.value(null),
-      // _logger.finest('sent logs.');
-        )
-        .catchError((Object err, StackTrace stackTrace) {
-      // ignore: unused_local_variable
-      String? message;
-      if (err is DioException) {
-        if (err.response != null) {
-          message = 'response:${err.response!.data}';
-        }
-      }
-      return Future<void>.error(err, stackTrace);
-    });
   }
+
+  Future<void> sendMetricEventsWithDio(List<MetricEntry> entries, CancelToken cancelToken) async {
+    final jsonObject = LokiPushBody([LokiStream(labelsString, entries)]).toJson();
+    final jsonBody = json.encode(jsonObject, toEncodable: _metricEntryToJson);
+    
+    try {
+      await _client.post<dynamic>('http://$server/api/prom/push',
+        data: jsonBody,
+        options: Options(
+          headers: <String, String>{HttpHeaders.authorizationHeader: authHeader},
+          contentType: ContentType.json.value,
+        ),
+      );
+      log('Metrics sent to loki successfully');
+    } catch (e, stackTrace) {
+      if(e is DioException) {
+        final message = e.response != null ? 'response: ${e.response!.data}' : null;
+        log('$message');
+        throw Future.error(e, stackTrace);
+      } else {
+        throw Future.error(e, stackTrace);
+      }
+    }
+}
 }
 
 class LokiPushBody {

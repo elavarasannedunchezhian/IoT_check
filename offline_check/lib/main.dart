@@ -1,11 +1,17 @@
+import 'dart:async';
+import 'dart:developer';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:offline_check/logger/logger.dart';
+import 'package:offline_check/logger/telemetry.dart';
 import 'keyboard/custom_keyboard.dart';
 import 'keyboard/custom_overlay.dart';
 
 void main() {
   runApp(const MyApp());
+  Telemetry.startSpan('started');
 }
 
 class MyApp extends StatelessWidget {
@@ -37,6 +43,20 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController textController = TextEditingController();
   KeyboardVisibilityController keyboardVisibilityController = KeyboardVisibilityController();
   String sizeText = "";
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<List<ConnectivityResult>> connectivitySubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    connectivitySubscription = _connectivity.onConnectivityChanged.listen((List<ConnectivityResult> result) { 
+      if(result.contains(ConnectivityResult.wifi)) {
+        log('Internet Connected');
+      } else {
+        log('Internet Disconnected');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start, // change to top
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               const Text(
                 'Name',
@@ -65,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   controller: textController,
                   onTap: () {
                     showSizeKeyboard(context, textController, () {});
-                    Logger.info('name');
+                    Telemetry.stopSpan('started');
                   },
                   onChanged: (value) {
                     setState(() {

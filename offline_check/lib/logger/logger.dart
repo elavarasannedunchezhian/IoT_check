@@ -30,10 +30,10 @@ class Logger {
         },
       );
 
-      await lokiAppender.sendLogEventsWithDio([logEntry], CancelToken());
-      log('Logs sent Successfully');
+      await lokiAppender.sendLogEvents([logEntry], CancelToken());
+      log('Logs sent to batch');
     } catch (error, stackTrace) {
-      log('Error sending logs to Loki: $error');
+      log('Error sending logs to batch: $error');
       log('StackTrace: $stackTrace');
     }
   }
