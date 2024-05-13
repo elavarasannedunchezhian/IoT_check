@@ -43,21 +43,22 @@ class LokiApiAppender {
   }
   
   static List<dynamic> batch = []; 
-  static int batchSize = 1;
+  static int batchSize = 3;
   Future<void> sendLogEvents(List<LogEntry> entries, CancelToken cancelToken) async {
     final jsonObject = LokiPushBody([LokiStream(labelsString, entries)]).toJson();
     final jsonBody = json.encode(jsonObject, toEncodable: _logEntryToJson);
-    log('batchSize before = ${batch.length}');
-    batch.add(jsonBody);
-    log('$batch');
-    if(batch.length >= batchSize) {
-      log('batchSize after = ${batch.length}');
-      for(final log in batch) {
-        sendBatchesToLoki(log, CancelToken());
-      }
-      batch.clear();
-      log('Batch size after sending to loki = ${batch.length}');
-    }
+    sendBatchesToLoki(jsonBody, cancelToken);
+    //log('batchSize before = ${batch.length}');
+    //batch.add(jsonBody);
+    //log('$batch');
+    //if(batch.length >= batchSize) {
+     // log('batchSize after = ${batch.length}');
+    //  for(final log in batch) {
+    //    sendBatchesToLoki(log, CancelToken());
+    //  }
+     // batch.clear();
+     // log('Batch size after sending to loki = ${batch.length}');
+    //}
   }
 
   dynamic _logEntryToJson(dynamic obj) {

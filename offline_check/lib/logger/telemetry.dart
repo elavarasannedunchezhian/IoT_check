@@ -11,7 +11,7 @@ class Telemetry {
   static final DateFormat _dateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
   static final Map<String, _SpanInfo> _spanTree = {};
 
-  static Future<void> _sendMetric(String name, _SpanInfo spanInfo, {bool isStop = false}) async {
+  static Future<void> _sendMetric(String name, _SpanInfo spanInfo, {bool isStop = false, String? status}) async {
     try {
       final metricAppender = MetricApiAppender(
         server: '172.208.58.149:3100',
@@ -33,7 +33,7 @@ class Telemetry {
           if (isStop)...{
             'stopTime': spanInfo.stopTime!,
             'duration': DateTime.parse(spanInfo.stopTime!).difference(DateTime.parse(spanInfo.startTime)).inMilliseconds,
-            'status': 'success'
+            'status': status
           }
         },
         );
@@ -62,7 +62,7 @@ class Telemetry {
     
   }
 
-  static Future<void> stopSpan(String spanName) async {
+  static Future<void> stopSpan(String spanName, String status) async {
     if(!_spanTree.containsKey(spanName)) {
       return log('Span $spanName is not started');
     }
@@ -70,7 +70,7 @@ class Telemetry {
       final spanInfo = _spanTree[spanName];
       final stopTime = _dateFormat.format(DateTime.now().toUtc());
       spanInfo!.stopTime = stopTime;
-      await _sendMetric(spanName, spanInfo, isStop: true);
+      await _sendMetric(spanName, spanInfo, isStop: true, status: status);
       _spanTree.remove(spanName);
     } else {
       return log('spanName cannot be empty');
