@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'keyboard/custom_keyboard.dart';
 import 'keyboard/custom_overlay.dart';
+import 'logger/logger.dart';
 
-void main() {
+Future<void> main() async {
   runApp(const MyApp());
 }
 
@@ -82,6 +83,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   controller: textController,
                   onTap: () {
                     showSizeKeyboard(context, textController, () {});
+                    Logger.info('send');
+                    Logger.debug('debug');
+                    Logger.warning('warn');
                   },
                   onChanged: (value) {
                     setState(() {

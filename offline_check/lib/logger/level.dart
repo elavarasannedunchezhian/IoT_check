@@ -2,7 +2,7 @@ class Level implements Comparable<Level> {
   final String name;
   final int value;
   const Level(this.name, this.value);
-  
+
   static const Level DEBUG = Level('DEBUG', 300);
   static const Level INFO = Level('INFO', 500);
   static const Level WARNING = Level('WARNING', 900);

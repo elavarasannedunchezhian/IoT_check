@@ -3,9 +3,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
-import 'package:offline_check/logger/level.dart';
 import 'package:offline_check/logger/logger.dart';
-import 'package:offline_check/logger/metric_appender.dart';
+import 'package:offline_check/telemetry/metric_appender.dart';
 
 class Telemetry {
   static final DateFormat _dateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -20,7 +19,6 @@ class Telemetry {
         labels: {
           'app': 'Checking',
           'Platform': Platform.operatingSystem,
-          'level': '${Level.DEBUG}'
         },
       );
 

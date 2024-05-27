@@ -2,9 +2,9 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:offline_check/logger/loki_appender.dart';
 
 import 'level.dart';
-import 'loki_appender.dart';
 
 class Logger {
   static Future<void> _sendLogEvent(String name, Level level,{StackTrace? stackTrace, bool isError = false}) async {
@@ -31,7 +31,7 @@ class Logger {
       );
 
       await lokiAppender.sendLogEvents([logEntry], CancelToken());
-      log('Logs sent to batch');
+      log('Logs sent to loki_appender');
     } catch (error, stackTrace) {
       log('Error sending logs to batch: $error');
       log('StackTrace: $stackTrace');

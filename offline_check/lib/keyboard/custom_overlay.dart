@@ -1,9 +1,11 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 
 class CustomOverlay extends StatefulWidget {
   final Widget child;
 
-  CustomOverlay({Key? key, required this.child}) : super(key: key);
+  const CustomOverlay({super.key, required this.child});
 
   @override
   _CustomOverlayState createState() => _CustomOverlayState();

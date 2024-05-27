@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -21,6 +22,10 @@ class LokiApiAppender {
   final Map<String, String> labels;
   final String labelsString;
 
+  static List<dynamic> batch = []; 
+  static int batchSize = 2;
+  static const int retryIntervalSeconds = 5;
+
   static String _createLabelsString(Map<String, String> labels) {
     return '{${labels.entries.map((entry) => '${entry.key}="${entry.value}"').join(',')}}';
   }
@@ -42,8 +47,6 @@ class LokiApiAppender {
     return value;
   }
   
-  static List<dynamic> batch = []; 
-  static int batchSize = 3;
   Future<void> sendLogEvents(List<LogEntry> entries, CancelToken cancelToken) async {
     final jsonObject = LokiPushBody([LokiStream(labelsString, entries)]).toJson();
     final jsonBody = json.encode(jsonObject, toEncodable: _logEntryToJson);
@@ -85,15 +88,30 @@ class LokiApiAppender {
           contentType: ContentType.json.value,
         ),
       );
-      log('Batch of logs sent to loki successfully');
-    } catch (e, stackTrace) {
-      if(e is DioException) {
-        final message = e.response != null ? 'response: ${e.response!.data}' : null;
-        log('$message');
-        throw Future.error(e, stackTrace);
-      } else {
-        throw Future.error(e, stackTrace);
+      log('Logs sent to loki successfully');
+    } catch (e) {
+      log('Logs failed');
+      batch.add(jsonBody);
+      log('${batch.length}');
+       if (batch.length == batchSize) {
+        _startRetryTimer();
       }
+    }
+  }
+
+  static Timer? _retryTimer;
+
+  void _startRetryTimer() {
+    if (_retryTimer == null || !_retryTimer!.isActive) {
+      _retryTimer = Timer.periodic(const Duration(seconds: retryIntervalSeconds), (timer) async {
+        if (batch.isNotEmpty) {
+          log('Retrying to send batch logs to Loki...');
+          for(final log in batch) {
+          sendBatchesToLoki(log, CancelToken());
+          }
+          batch.clear();
+        }
+      });
     }
   }
 }

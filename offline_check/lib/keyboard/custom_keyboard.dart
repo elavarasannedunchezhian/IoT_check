@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomKeyboard extends StatefulWidget {
   const CustomKeyboard({
-    Key? key,
+    super.key,
     required this.backgroundColor,
     required this.bottomPaddingColor,
     required this.bottomPaddingHeight,
@@ -14,7 +14,7 @@ class CustomKeyboard extends StatefulWidget {
     required this.keybordButtonColor,
     required this.elevation,
     required this.controller,
-  }) : super(key: key);
+  });
   final double keyboardHeight, keyboardWidth;
   final Function(String) onChange;
   final Color backgroundColor;
