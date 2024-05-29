@@ -1,10 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
-import 'package:offline_check/logger/loki_appender.dart';
-
-import 'level.dart';
+import 'package:logging/logging.dart';
+import '../test_logger/loki_appender.dart';
 
 class Logger {
   static Future<void> _sendLogEvent(String name, Level level,{StackTrace? stackTrace, bool isError = false}) async {
@@ -20,17 +18,7 @@ class Logger {
         },
       );
 
-      final logEntry = LogEntry(
-        ts: DateTime.now(),
-        line: name,
-        lineLabels: {
-          if(isError)...{
-            ' - stackTrace': stackTrace.toString(),
-          }
-        },
-      );
-
-      await lokiAppender.sendLogEvents([logEntry], CancelToken());
+      await lokiAppender.log(level,DateTime.now(),name,{});
       log('Logs sent to loki_appender');
     } catch (error, stackTrace) {
       log('Error sending logs to batch: $error');
@@ -39,7 +27,7 @@ class Logger {
   }
 
   static Future<void> info(String name) async => _sendLogEvent(name, Level.INFO);
-  static Future<void> error(String name, StackTrace stackTrace) async => _sendLogEvent('Error occurred: $name', Level.ERROR, stackTrace: stackTrace, isError: true);
-  static Future<void> debug(String name) async => _sendLogEvent(name, Level.DEBUG);
+  static Future<void> error(String name, StackTrace stackTrace) async => _sendLogEvent('Error occurred: $name', Level.SEVERE, stackTrace: stackTrace, isError: true);
+  static Future<void> debug(String name) async => _sendLogEvent(name, Level.CONFIG);
   static Future<void> warning(String name) async => _sendLogEvent(name, Level.WARNING);
 }

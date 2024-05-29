@@ -24,7 +24,6 @@ class LokiApiAppender {
 
   static List<dynamic> batch = []; 
   static int batchSize = 2;
-  static const int retryIntervalSeconds = 5;
 
   static String _createLabelsString(Map<String, String> labels) {
     return '{${labels.entries.map((entry) => '${entry.key}="${entry.value}"').join(',')}}';
@@ -99,11 +98,11 @@ class LokiApiAppender {
     }
   }
 
-  static Timer? _retryTimer;
+  static Timer? _timer;
 
   void _startRetryTimer() {
-    if (_retryTimer == null || !_retryTimer!.isActive) {
-      _retryTimer = Timer.periodic(const Duration(seconds: retryIntervalSeconds), (timer) async {
+    if (_timer == null || !_timer!.isActive) {
+      _timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
         if (batch.isNotEmpty) {
           log('Retrying to send batch logs to Loki...');
           for(final log in batch) {

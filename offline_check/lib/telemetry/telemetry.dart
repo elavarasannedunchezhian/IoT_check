@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
-import 'package:offline_check/logger/logger.dart';
 import 'package:offline_check/telemetry/metric_appender.dart';
 
 class Telemetry {
@@ -41,7 +40,6 @@ class Telemetry {
     } catch (error, stackTrace) {
       log('Error sending logs to Loki: $error');
       log('StackTrace: $stackTrace');
-      Logger.error('$error',stackTrace);
     }
   }
 

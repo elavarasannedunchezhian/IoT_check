@@ -1,15 +1,19 @@
-import 'dart:async';
 import 'dart:developer';
-
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:offline_check/connectivity_service.dart';
+import 'package:provider/provider.dart';
 import 'keyboard/custom_keyboard.dart';
 import 'keyboard/custom_overlay.dart';
 import 'logger/logger.dart';
 
-Future<void> main() async {
-  runApp(const MyApp());
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ConnectivityService(),
+      child: const MyApp(),
+      )
+    );
 }
 
 class MyApp extends StatelessWidget {
@@ -41,14 +45,13 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController textController = TextEditingController();
   KeyboardVisibilityController keyboardVisibilityController = KeyboardVisibilityController();
   String sizeText = "";
-  final Connectivity _connectivity = Connectivity();
-  late StreamSubscription<List<ConnectivityResult>> connectivitySubscription;
 
   @override
   void initState() {
     super.initState();
-    connectivitySubscription = _connectivity.onConnectivityChanged.listen((List<ConnectivityResult> result) { 
-      if(result.contains(ConnectivityResult.wifi)) {
+    var connectivityService = Provider.of<ConnectivityService>(context, listen: false);
+    connectivityService.addListener(() {
+      if (connectivityService.isConnected) {
         log('Internet Connected');
       } else {
         log('Internet Disconnected');
@@ -83,9 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   controller: textController,
                   onTap: () {
                     showSizeKeyboard(context, textController, () {});
-                    Logger.info('send');
-                    Logger.debug('debug');
-                    Logger.warning('warn');
+                    Logger.info('i');
                   },
                   onChanged: (value) {
                     setState(() {

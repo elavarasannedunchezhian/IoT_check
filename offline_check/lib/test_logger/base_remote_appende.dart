@@ -20,7 +20,7 @@ abstract class BaseLogSender extends BaseLogAppender {
   BaseLogSender({
     LogRecordFormatter? formatter,
     int? bufferSize,
-  })  : bufferSize = bufferSize ?? 2,
+  })  : bufferSize = bufferSize ?? 500,
         super(formatter);
 
   Map<String, String> _userProperties = {};
